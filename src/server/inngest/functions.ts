@@ -2,8 +2,7 @@ import { inngest } from "./client";
 import { createClient } from "../db/server"; // Use server client
 
 export const mockPricingEngineJob = inngest.createFunction(
-  { id: "mock-pricing-engine" },
-  { cron: "*/15 * * * *" }, // Run every 15 minutes
+  { id: "mock-pricing-engine", triggers: [{ cron: "*/15 * * * *" }] },
   async ({ event, step }) => {
     // 1. Fetch all active creators
     const creators = await step.run("fetch-active-creators", async () => {
@@ -92,8 +91,7 @@ export const mockPricingEngineJob = inngest.createFunction(
 // Weekly Settlement Job: Sundays at 00:00 PT
 // This job calculates weekly P&L, assigns badges, and resets the weekly leaderboard.
 export const weeklySettlementJob = inngest.createFunction(
-  { id: "weekly-settlement" },
-  { cron: "0 0 * * 0" }, // Runs Sunday at midnight
+  { id: "weekly-settlement", triggers: [{ cron: "0 0 * * 0" }] },
   async ({ event, step }) => {
     
     // 1. Calculate Weekly P&L for all users

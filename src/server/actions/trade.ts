@@ -7,13 +7,13 @@ import { redirect } from "next/navigation";
 // Since we don't have a logged-in user yet, we will mock a user ID or return an error.
 // In a real flow, you'd get the user from supabase.auth.getUser()
 
-export async function buyShares(creatorId: string, formData: FormData) {
+export async function buyShares(creatorId: string, formData: FormData): Promise<void> {
   const supabase = await createClient();
 
   // 1. Get current user
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return { error: "You must be logged in to buy shares." };
+    redirect("/login");
   }
 
   // 2. Fetch creator price and info
@@ -24,7 +24,7 @@ export async function buyShares(creatorId: string, formData: FormData) {
     .single();
 
   if (creatorError || !creator) {
-    return { error: "Creator not found." };
+    return;
   }
 
   const cost = Number(formData.get("amount") || 1000);
@@ -38,7 +38,7 @@ export async function buyShares(creatorId: string, formData: FormData) {
     .single();
 
   if (userError || !userData || userData.buds_balance < cost) {
-    return { error: "Insufficient buds." };
+    return;
   }
 
   // 4. Execute Trade (in reality, this should be a stored procedure or transaction)
@@ -70,13 +70,13 @@ export async function buyShares(creatorId: string, formData: FormData) {
   redirect(`/receipt?${params.toString()}`);
 }
 
-export async function sellShares(positionId: string, formData: FormData) {
+export async function sellShares(positionId: string, formData: FormData): Promise<void> {
   const supabase = await createClient();
 
   // 1. Get current user
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return { error: "You must be logged in to sell shares." };
+    redirect("/login");
   }
 
   // 2. Fetch position & creator price
@@ -88,7 +88,7 @@ export async function sellShares(positionId: string, formData: FormData) {
     .single();
 
   if (!position || position.status === "closed") {
-    return { error: "Invalid position." };
+    return;
   }
   
   let sharesToSell = Number(formData.get("shares"));
