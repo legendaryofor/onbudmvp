@@ -47,7 +47,16 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
   // Mock chart data (longer for detail page)
   const sparklineData = generateMockSparkline(Number(creator.current_price), 50);
 
-  const buyAction = buyShares.bind(null, creator.id);
+  async function buyAction(formData: FormData) {
+    "use server";
+    await buyShares(creator.id, formData);
+  }
+
+  const positionId = position?.id;
+  async function sellAction(formData: FormData) {
+    "use server";
+    if (positionId) await sellShares(positionId, formData);
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-24">
@@ -145,7 +154,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           </Button>
         </form>
         {position && (
-          <form action={sellShares.bind(null, position.id)} className="flex-1">
+          <form action={sellAction} className="flex-1">
             <Button type="submit" variant="secondary" className="w-full bg-white/10 hover:bg-white/20 text-white font-bold text-lg h-14 rounded-2xl border border-white/10">
               Sell
             </Button>
